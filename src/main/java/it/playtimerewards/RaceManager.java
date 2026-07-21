@@ -76,7 +76,7 @@ final class RaceManager implements Listener {
         ensurePlayerInitialized(player);
         PlayerRace current = getRace(player.getUniqueId());
         if (current == race) {
-            player.sendMessage("§aLa tua razza resta §e" + race.displayName() + "§a. Conservi ancora il cambio gratuito.");
+            player.sendMessage("§bLa tua razza resta §e" + race.displayName() + "§b. Conservi ancora il cambio gratuito.");
             return false;
         }
         applyChange(player, race, true);
@@ -95,7 +95,7 @@ final class RaceManager implements Listener {
         swordCriticalCounters.remove(uuid);
         save();
         updateLuckPermsPrefix(player, race);
-        player.sendMessage("§aLa tua razza è ora §e" + race.displayName() + "§a.");
+        player.sendMessage("§bLa tua razza è ora §e" + race.displayName() + "§a.");
     }
 
     @EventHandler
@@ -207,7 +207,7 @@ final class RaceManager implements Listener {
         int needed = Math.max(1, plugin.getConfig().getInt("races.rewards.sword.criticals-required", 3));
         int current = swordCriticalCounters.merge(attacker.getUniqueId(), 1, Integer::sum);
         if (current < needed) {
-            attacker.sendActionBar("§eCritici SWORD: §f" + current + "§7/§f" + needed);
+            attacker.sendActionBar("§eCritici §e§lSPADA§e: §f" + current + "§7/§f" + needed);
             return;
         }
 

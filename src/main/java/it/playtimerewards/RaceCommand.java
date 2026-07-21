@@ -35,8 +35,8 @@ final class RaceCommand implements CommandExecutor, TabCompleter {
             player.sendMessage("§eRazza attuale: §f" + raceManager.getRace(player.getUniqueId()).displayName());
             player.sendMessage(raceManager.hasFreeChange(player.getUniqueId())
                     ? "§aHai ancora un cambio razza gratuito."
-                    : "§7Il prossimo cambio costa §6" + format(raceManager.changeCost()) + "$§7.");
-            player.sendMessage("§7Usa §f/razza cambia <miner|contadino|scudo|sword>§7.");
+                    : "§aIl prossimo cambio costa §f\uE0D8 §e" + format(raceManager.changeCost()) + ".");
+            player.sendMessage("§cUsa §f/razza cambia <miner|contadino|scudo|sword>§7.");
             return true;
         }
 
@@ -52,7 +52,7 @@ final class RaceCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         if (raceManager.getRace(player.getUniqueId()) == target) {
-            player.sendMessage("§eHai già selezionato questa razza.");
+            player.sendMessage("§aHai già selezionato questa razza.");
             return true;
         }
 
@@ -61,11 +61,11 @@ final class RaceCommand implements CommandExecutor, TabCompleter {
         pending.put(player.getUniqueId(), new PendingChange(
                 target, cost, free, System.currentTimeMillis() + CONFIRM_TIMEOUT_MILLIS));
         if (free) {
-            player.sendMessage("§eStai per usare il tuo §acambio gratuito §eper diventare §f" + target.displayName() + "§e.");
+            player.sendMessage("§aStai per usare il tuo §ecambio gratuito §aper diventare §f" + target.displayName() + "§a.");
         } else {
-            player.sendMessage("§eStai per diventare §f" + target.displayName() + "§e al costo di §6" + format(cost) + "$§e.");
+            player.sendMessage("§aStai per diventare §f" + target.displayName() + "§a al costo di §f\uE0D8 §e" + format(cost) + "§e.");
         }
-        player.sendMessage("§aScrivi §f/razza conferma §aentro 30 secondi per confermare.");
+        player.sendMessage("§aScrivi §e/razza conferma §aentro 30 secondi per confermare.");
         return true;
     }
 
@@ -80,7 +80,7 @@ final class RaceCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         if (!raceManager.canPay(player, change.cost())) {
-            player.sendMessage("§cNon hai abbastanza soldi. Servono §6" + format(change.cost()) + "$§c.");
+            player.sendMessage("§cNon hai abbastanza soldi. Servono §f\uE0D8 §e" + format(change.cost()) + "§c.");
             return true;
         }
         if (!raceManager.withdraw(player, change.cost())) {
