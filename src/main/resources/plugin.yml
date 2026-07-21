@@ -1,0 +1,25 @@
+name: PlaytimeRewards
+version: '1.0.0'
+main: it.playtimerewards.PlaytimeRewardsPlugin
+api-version: '1.21.11'
+author: ItsInspector
+description: Ricompense persistenti ogni 30 minuti di gioco.
+depend: [Vault]
+
+commands:
+  playtime:
+    description: Mostra il tuo tempo di gioco registrato dal plugin.
+    usage: /playtime
+    permission: playtimerewards.playtime
+  setplaytimereward:
+    description: Imposta come ricompensa l'oggetto tenuto nella mano principale.
+    usage: /setplaytimereward
+    permission: playtimerewards.admin
+
+permissions:
+  playtimerewards.playtime:
+    description: Permette di usare /playtime.
+    default: true
+  playtimerewards.admin:
+    description: Permette di impostare la ricompensa con /setplaytimereward.
+    default: op

@@ -1,0 +1,43 @@
+# Ogni quanti minuti online consegnare la ricompensa.
+# Lascia 30 per il comportamento richiesto.
+reward-interval-minutes: 30
+
+reward:
+  # Denaro consegnato tramite Vault a ogni intervallo.
+  # Può contenere anche decimali, per esempio 125.50.
+  money: 1000.0
+
+  # Viene compilato automaticamente con /setplaytimereward.
+  # Non è consigliato modificarlo manualmente.
+  item: null
+
+  # Se l'inventario è pieno, lascia cadere a terra gli oggetti avanzati.
+  drop-overflow-items: true
+
+# Salvataggio periodico di sicurezza dei dati dei giocatori.
+autosave-seconds: 300
+
+# Impostazioni AFK
+afk:
+  # Minuti di inattività prima che il giocatore venga messo in AFK
+  afk-timeout-minutes: 15
+  # Minuti massimi in AFK prima di essere kickato dal server
+  kick-timeout-minutes: 60
+  # Abilita il sistema AFK
+  enabled: true
+
+messages:
+  prefix: "&6[PlaytimeRewards] &r"
+  no-permission: "&cNon hai il permesso per usare questo comando."
+  player-only: "&cQuesto comando può essere usato solo da un giocatore."
+  empty-hand: "&cDevi tenere nella mano principale l'oggetto da impostare."
+  reward-set: "&aRicompensa impostata: &e{amount}x {item}&a."
+  playtime: "&aIl tuo playtime è &e{time}&a."
+  reward-received: "&aHai ricevuto la ricompensa dei &e{interval} minuti&a: {reward}&a."
+  reward-not-configured: "&eHai raggiunto l'intervallo, ma non è configurata alcuna ricompensa valida."
+  inventory-full: "&eIl tuo inventario era pieno: gli oggetti avanzati sono stati lasciati a terra."
+  vault-unavailable: "&cLa ricompensa in denaro non è stata consegnata perché Vault o un provider economy non è disponibile."
+  economy-error: "&cNon è stato possibile consegnare la ricompensa in denaro. Avvisa un amministratore."
+  afk-enabled: "&eOra sei AFK."
+  afk-disabled: "&aRimozione modalità AFK."
+  afk-kicked: "&cSei stato kickato per inattività."
