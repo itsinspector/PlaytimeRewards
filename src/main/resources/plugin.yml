@@ -1,11 +1,10 @@
 name: PlaytimeRewards
-version: '1.0.0'
+version: '1.2.0'
 main: it.playtimerewards.PlaytimeRewardsPlugin
-api-version: '1.21.11'
+api-version: '1.21'
 author: ItsInspector
-description: Ricompense persistenti ogni 30 minuti di gioco.
-depend: [Vault]
-
+description: Ricompense playtime e sistema razze persistente.
+depend: [Vault, LuckPerms]
 commands:
   playtime:
     description: Mostra il tuo tempo di gioco registrato dal plugin.
@@ -15,10 +14,16 @@ commands:
     description: Imposta come ricompensa l'oggetto tenuto nella mano principale.
     usage: /setplaytimereward
     permission: playtimerewards.admin
-
+  razza:
+    description: Mostra o cambia la propria razza.
+    usage: /razza [cambia <miner|contadino|scudo|sword>|conferma]
+    permission: playtimerewards.razza
 permissions:
   playtimerewards.playtime:
     description: Permette di usare /playtime.
+    default: true
+  playtimerewards.razza:
+    description: Permette di usare /razza.
     default: true
   playtimerewards.admin:
     description: Permette di impostare la ricompensa con /setplaytimereward.

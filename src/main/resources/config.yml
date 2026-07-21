@@ -1,43 +1,55 @@
-# Ogni quanti minuti online consegnare la ricompensa.
-# Lascia 30 per il comportamento richiesto.
-reward-interval-minutes: 30
-
-reward:
-  # Denaro consegnato tramite Vault a ogni intervallo.
-  # Può contenere anche decimali, per esempio 125.50.
-  money: 1000.0
-
-  # Viene compilato automaticamente con /setplaytimereward.
-  # Non è consigliato modificarlo manualmente.
-  item: null
-
-  # Se l'inventario è pieno, lascia cadere a terra gli oggetti avanzati.
-  drop-overflow-items: true
-
-# Salvataggio periodico di sicurezza dei dati dei giocatori.
-autosave-seconds: 300
-
-# Impostazioni AFK
-afk:
-  # Minuti di inattività prima che il giocatore venga messo in AFK
-  afk-timeout-minutes: 15
-  # Minuti massimi in AFK prima di essere kickato dal server
-  kick-timeout-minutes: 60
-  # Abilita il sistema AFK
-  enabled: true
-
-messages:
-  prefix: "&6[PlaytimeRewards] &r"
-  no-permission: "&cNon hai il permesso per usare questo comando."
-  player-only: "&cQuesto comando può essere usato solo da un giocatore."
-  empty-hand: "&cDevi tenere nella mano principale l'oggetto da impostare."
-  reward-set: "&aRicompensa impostata: &e{amount}x {item}&a."
-  playtime: "&aIl tuo playtime è &e{time}&a."
-  reward-received: "&aHai ricevuto la ricompensa dei &e{interval} minuti&a: {reward}&a."
-  reward-not-configured: "&eHai raggiunto l'intervallo, ma non è configurata alcuna ricompensa valida."
-  inventory-full: "&eIl tuo inventario era pieno: gli oggetti avanzati sono stati lasciati a terra."
-  vault-unavailable: "&cLa ricompensa in denaro non è stata consegnata perché Vault o un provider economy non è disponibile."
-  economy-error: "&cNon è stato possibile consegnare la ricompensa in denaro. Avvisa un amministratore."
-  afk-enabled: "&eOra sei AFK."
-  afk-disabled: "&aRimozione modalità AFK."
-  afk-kicked: "&cSei stato kickato per inattività."
+# Incolla questa sezione alla fine del config.yml esistente.
+races:
+  luckperms-prefix-priority: 100
+  change-cost: 10000.0
+  show-reward-message: true
+  rewards:
+    miner:
+      COAL_ORE: 0.20
+      DEEPSLATE_COAL_ORE: 0.25
+      COPPER_ORE: 0.20
+      DEEPSLATE_COPPER_ORE: 0.25
+      IRON_ORE: 0.40
+      DEEPSLATE_IRON_ORE: 0.50
+      GOLD_ORE: 0.70
+      DEEPSLATE_GOLD_ORE: 0.85
+      REDSTONE_ORE: 0.30
+      DEEPSLATE_REDSTONE_ORE: 0.35
+      LAPIS_ORE: 0.50
+      DEEPSLATE_LAPIS_ORE: 0.60
+      DIAMOND_ORE: 2.00
+      DEEPSLATE_DIAMOND_ORE: 2.50
+      EMERALD_ORE: 2.50
+      DEEPSLATE_EMERALD_ORE: 3.00
+      NETHER_GOLD_ORE: 0.30
+      NETHER_QUARTZ_ORE: 0.25
+      ANCIENT_DEBRIS: 5.00
+    contadino:
+      harvest:
+        WHEAT: 0.20
+        CARROTS: 0.20
+        POTATOES: 0.20
+        BEETROOTS: 0.25
+        NETHER_WART: 0.30
+        COCOA: 0.25
+      place:
+        WHEAT: 0.03
+        CARROTS: 0.03
+        POTATOES: 0.03
+        BEETROOTS: 0.03
+        NETHER_WART: 0.04
+        COCOA: 0.04
+    scudo:
+      per-block: 0.25
+    sword:
+      criticals-required: 3
+      default: 0.50
+      mobs:
+        ZOMBIE: 0.50
+        SKELETON: 0.60
+        CREEPER: 0.75
+        SPIDER: 0.50
+        ENDERMAN: 1.25
+        BLAZE: 1.00
+        WITHER_SKELETON: 1.25
+        WARDEN: 5.00
