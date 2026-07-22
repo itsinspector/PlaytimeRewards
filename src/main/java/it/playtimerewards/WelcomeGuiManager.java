@@ -23,7 +23,7 @@ import java.util.UUID;
 
 final class WelcomeGuiManager implements Listener {
     private static final String GUI_TITLE = "§e§l§nᴠᴜᴏɪ ʟᴇɢɢᴇʀᴇ ʟᴀ ɢᴜɪᴅᴀ?";
-    private static final String RACE_TITLE = "§6§l§nSCEGLI LA TUA RAZZA";
+    private static final String RACE_TITLE = "§f\uE0F8 §6§l§nsᴄᴇɢʟɪ ʟᴀ ᴛᴜᴀ ʀᴀᴢᴢᴀ";
     private static final int GUI_SIZE = 27;
     private static final int SKIP_SLOT = 11;
     private static final int GUIDE_SLOT = 15;

@@ -16,8 +16,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.io.File;
@@ -53,6 +55,7 @@ final class RaceManager implements Listener {
         this.file = new File(plugin.getDataFolder(), "races.yml");
         installConfigDefaults();
         load();
+        startRaceEffectTask();
     }
 
     PlayerRace getRace(UUID uuid) {
@@ -76,7 +79,7 @@ final class RaceManager implements Listener {
         ensurePlayerInitialized(player);
         PlayerRace current = getRace(player.getUniqueId());
         if (current == race) {
-            player.sendMessage("§bLa tua razza resta §e" + race.displayName() + "§b. Conservi ancora il cambio gratuito.");
+            player.sendMessage("§aLa tua razza resta §e" + race.displayName() + "§a. Conservi ancora il cambio gratuito.");
             return false;
         }
         applyChange(player, race, true);
@@ -95,15 +98,96 @@ final class RaceManager implements Listener {
         swordCriticalCounters.remove(uuid);
         save();
         updateLuckPermsPrefix(player, race);
-        player.sendMessage("§bLa tua razza è ora §e" + race.displayName() + "§a.");
+        applyRaceEffect(player, race);
+        player.sendMessage("§aLa tua razza è ora §e" + race.displayName() + "§a.");
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         ensurePlayerInitialized(player);
+        plugin.getServer().getScheduler().runTask(plugin, () -> {
+            PlayerRace race = getRace(player.getUniqueId());
+            updateLuckPermsPrefix(player, race);
+            applyRaceEffect(player, race);
+        });
+    }
+
+    @EventHandler
+    public void onWorldChange(PlayerChangedWorldEvent event) {
+        Player player = event.getPlayer();
         plugin.getServer().getScheduler().runTask(plugin,
-                () -> updateLuckPermsPrefix(player, getRace(player.getUniqueId())));
+                () -> applyRaceEffect(player, getRace(player.getUniqueId())));
+    }
+
+
+    private void startRaceEffectTask() {
+        plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+            for (Player player : plugin.getServer().getOnlinePlayers()) {
+                applyRaceEffect(player, getRace(player.getUniqueId()));
+            }
+        }, 20L, 100L);
+    }
+
+    private void applyRaceEffect(Player player, PlayerRace race) {
+        if (!isRaceEnabled(player)) {
+            removeManagedRaceEffects(player);
+            return;
+        }
+
+        PotionEffectType desired = effectFor(race);
+
+        for (PotionEffectType managed : managedEffectTypes()) {
+            if (managed != desired && player.hasPotionEffect(managed)) {
+                player.removePotionEffect(managed);
+            }
+        }
+
+        PotionEffect current = player.getPotionEffect(desired);
+        if (current != null && current.getAmplifier() >= 0 && current.getDuration() > 200) {
+            return;
+        }
+
+        player.addPotionEffect(new PotionEffect(
+                desired,
+                Integer.MAX_VALUE,
+                0,
+                false,
+                false,
+                true
+        ), true);
+    }
+
+    private void removeManagedRaceEffects(Player player) {
+        for (PotionEffectType managed : managedEffectTypes()) {
+            if (player.hasPotionEffect(managed)) {
+                player.removePotionEffect(managed);
+            }
+        }
+    }
+
+    boolean isRaceEnabled(Player player) {
+        String currentWorld = player.getWorld().getName();
+        return plugin.getConfig().getStringList("races.disabled-worlds").stream()
+                .noneMatch(world -> world.equalsIgnoreCase(currentWorld));
+    }
+
+    private PotionEffectType effectFor(PlayerRace race) {
+        return switch (race) {
+            case MINER -> PotionEffectType.HASTE;
+            case SWORD -> PotionEffectType.STRENGTH;
+            case CONTADINO -> PotionEffectType.SPEED;
+            case SCUDO -> PotionEffectType.RESISTANCE;
+        };
+    }
+
+    private Set<PotionEffectType> managedEffectTypes() {
+        return Set.of(
+                PotionEffectType.HASTE,
+                PotionEffectType.STRENGTH,
+                PotionEffectType.SPEED,
+                PotionEffectType.RESISTANCE
+        );
     }
 
     private void updateLuckPermsPrefix(Player player, PlayerRace race) {
@@ -154,7 +238,7 @@ final class RaceManager implements Listener {
     }
 
     private void reward(Player player, double amount, String reason) {
-        if (amount <= 0.0D) return;
+        if (!isRaceEnabled(player) || amount <= 0.0D) return;
         if (economy == null) {
             plugin.getLogger().warning("Ricompensa razza non pagata: nessun provider economy disponibile.");
             return;
@@ -168,6 +252,7 @@ final class RaceManager implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
+        if (!isRaceEnabled(player)) return;
         Material material = event.getBlock().getType();
         PlayerRace race = getRace(player.getUniqueId());
 
@@ -184,6 +269,7 @@ final class RaceManager implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
+        if (!isRaceEnabled(player)) return;
         if (getRace(player.getUniqueId()) != PlayerRace.CONTADINO) return;
         Material material = event.getBlockPlaced().getType();
         reward(player, configuredMaterialReward("races.rewards.contadino.place", material), "Semina");
@@ -192,6 +278,7 @@ final class RaceManager implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onCombat(EntityDamageByEntityEvent event) {
         if (event.getEntity() instanceof Player defender
+                && isRaceEnabled(defender)
                 && getRace(defender.getUniqueId()) == PlayerRace.SCUDO
                 && defender.isBlocking()
                 && holdsShield(defender)) {
@@ -199,6 +286,7 @@ final class RaceManager implements Listener {
         }
 
         if (!(event.getDamager() instanceof Player attacker)) return;
+        if (!isRaceEnabled(attacker)) return;
         if (getRace(attacker.getUniqueId()) != PlayerRace.SWORD) return;
         if (!(event.getEntity() instanceof Monster monster)) return;
         if (!attacker.getInventory().getItemInMainHand().getType().name().endsWith("_SWORD")) return;
@@ -207,7 +295,7 @@ final class RaceManager implements Listener {
         int needed = Math.max(1, plugin.getConfig().getInt("races.rewards.sword.criticals-required", 3));
         int current = swordCriticalCounters.merge(attacker.getUniqueId(), 1, Integer::sum);
         if (current < needed) {
-            attacker.sendActionBar("§eCritici §e§lSPADA§e: §f" + current + "§7/§f" + needed);
+            attacker.sendActionBar("§eCritici SWORD: §f" + current + "§7/§f" + needed);
             return;
         }
 
@@ -281,6 +369,10 @@ final class RaceManager implements Listener {
                 Map.entry("SUGAR_CANE", 0.02), Map.entry("CACTUS", 0.02), Map.entry("BAMBOO", 0.01)
         ));
 
+        plugin.getConfig().addDefault("races.disabled-worlds", java.util.List.of(
+                "arena-pvp-unranked",
+                "pillars"
+        ));
         plugin.getConfig().addDefault("races.luckperms-prefix-priority", 100);
         plugin.getConfig().addDefault("races.change-cost", 10000.0D);
         plugin.getConfig().addDefault("races.show-reward-message", true);

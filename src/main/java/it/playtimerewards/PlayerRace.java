@@ -9,7 +9,7 @@ public enum PlayerRace {
     MINER("Miner", Material.DIAMOND_PICKAXE, "%img_miner% &r"),
     CONTADINO("Contadino", Material.GOLDEN_HOE, "%img_contadino% &r"),
     SCUDO("Scudo", Material.SHIELD, "%img_scudo% &r"),
-    SWORD("Sword", Material.DIAMOND_SWORD, "%img_sword% &r");
+    SPADA("SPADA", Material.DIAMOND_SWORD, "%img_sword% &r");
 
     private final String displayName;
     private final Material icon;

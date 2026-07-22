@@ -13,6 +13,7 @@ public final class PlaytimeRewardsPlugin extends JavaPlugin {
     private RewardService rewardService;
     private AfkManager afkManager;
     private RaceManager raceManager;
+    private RaceGoalManager raceGoalManager;
 
     @Override
     public void onEnable() {
@@ -26,6 +27,7 @@ public final class PlaytimeRewardsPlugin extends JavaPlugin {
         rewardService = new RewardService(this, dataStore, messages, economy);
         afkManager = new AfkManager(this, messages);
         raceManager = new RaceManager(this, economy, luckPerms);
+        raceGoalManager = new RaceGoalManager(this, raceManager, economy);
         WelcomeGuiManager welcomeGuiManager = new WelcomeGuiManager(this, rewardService, raceManager);
         RaceCommand raceCommand = new RaceCommand(raceManager);
 
@@ -37,6 +39,7 @@ public final class PlaytimeRewardsPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerMovementListener(afkManager), this);
         getServer().getPluginManager().registerEvents(welcomeGuiManager, this);
         getServer().getPluginManager().registerEvents(raceManager, this);
+        getServer().getPluginManager().registerEvents(raceGoalManager, this);
 
         rewardService.start();
         afkManager.start();
@@ -53,6 +56,7 @@ public final class PlaytimeRewardsPlugin extends JavaPlugin {
     public void onDisable() {
         if (rewardService != null) rewardService.shutdown();
         if (afkManager != null) afkManager.shutdown();
+        if (raceGoalManager != null) raceGoalManager.shutdown();
         if (raceManager != null) raceManager.save();
         if (dataStore != null) dataStore.save();
         getLogger().info("PlaytimeRewards disabilitato e dati salvati.");

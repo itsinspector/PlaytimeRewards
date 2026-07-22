@@ -8,11 +8,13 @@ import java.util.Map;
 import java.util.UUID;
 
 final class AfkManager {
+
     private static final long MILLIS_PER_MINUTE = 60_000L;
 
     private final PlaytimeRewardsPlugin plugin;
     private final MessageService messages;
     private final Map<UUID, AfkState> afkStates = new HashMap<>();
+
     private BukkitTask afkTask;
 
     AfkManager(PlaytimeRewardsPlugin plugin, MessageService messages) {
@@ -32,6 +34,7 @@ final class AfkManager {
         if (afkTask != null) {
             afkTask.cancel();
         }
+
         afkStates.clear();
     }
 
@@ -53,8 +56,7 @@ final class AfkManager {
 
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             UUID uuid = player.getUniqueId();
-            AfkState state = afkStates.computeIfAbsent(uuid, k -> new AfkState(now, false));
-
+            AfkState state = afkStates.computeIfAbsent(uuid, ignored -> new AfkState(now, false));
             long inactiveMillis = now - state.lastActivityTime;
 
             if (!state.isAfk && inactiveMillis >= afkTimeoutMillis) {
@@ -63,12 +65,19 @@ final class AfkManager {
                 messages.send(player, "afk-enabled");
             }
 
-            if (state.isAfk) {
-                long afkDurationMillis = now - state.afkStartTime;
-                if (afkDurationMillis >= kickTimeoutMillis) {
-                    player.kickPlayer(messages.getMessage("afk-kicked"));
-                }
+            if (!state.isAfk) {
+                continue;
             }
+
+            long afkDurationMillis = now - state.afkStartTime;
+            if (afkDurationMillis < kickTimeoutMillis) {
+                continue;
+            }
+
+            // Rimuove lo stato AFK prima del kick. In questo modo il giocatore
+            // viene espulso una sola volta e al prossimo accesso riparte come attivo.
+            afkStates.put(uuid, new AfkState(now, false));
+            player.kickPlayer(messages.getMessage("afk-kicked"));
         }
     }
 
@@ -94,7 +103,7 @@ final class AfkManager {
         AfkState(long lastActivityTime, boolean isAfk) {
             this.lastActivityTime = lastActivityTime;
             this.isAfk = isAfk;
-            this.afkStartTime = -1;
+            this.afkStartTime = -1L;
         }
     }
 }
