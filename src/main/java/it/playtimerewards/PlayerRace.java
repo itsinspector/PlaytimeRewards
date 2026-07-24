@@ -6,10 +6,10 @@ import java.util.Locale;
 import java.util.Optional;
 
 public enum PlayerRace {
-    MINER("Miner", Material.DIAMOND_PICKAXE, "%img_miner% &r"),
-    CONTADINO("Contadino", Material.GOLDEN_HOE, "%img_contadino% &r"),
-    SCUDO("Scudo", Material.SHIELD, "%img_scudo% &r"),
-    SPADA("SPADA", Material.DIAMOND_SWORD, "%img_sword% &r");
+    MINER("§7§lMINER", Material.DIAMOND_PICKAXE, "%img_miner% &r"),
+    CONTADINO("§a§lCONTADINO", Material.GOLDEN_HOE, "%img_contadino% &r"),
+    SCUDO("§f§lSCUDO", Material.SHIELD, "%img_scudo% &r"),
+    SPADA("§b§lSPADA", Material.DIAMOND_SWORD, "%img_sword% &r");
 
     private final String displayName;
     private final Material icon;
@@ -42,7 +42,7 @@ public enum PlayerRace {
             case "MINER" -> Optional.of(MINER);
             case "CONTADINO" -> Optional.of(CONTADINO);
             case "SCUDO" -> Optional.of(SCUDO);
-            case "SWORD" -> Optional.of(SWORD);
+            case "SPADA" -> Optional.of(SPADA);
             default -> Optional.empty();
         };
     }

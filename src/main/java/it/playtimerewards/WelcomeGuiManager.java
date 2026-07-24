@@ -72,7 +72,7 @@ final class WelcomeGuiManager implements Listener {
         inventory.setItem(14, raceItem(PlayerRace.SCUDO, current,
                 "§fGuadagni quando pari un colpo",
                 "§futilizzando uno scudo."));
-        inventory.setItem(16, raceItem(PlayerRace.SWORD, current,
+        inventory.setItem(16, raceItem(PlayerRace.SPADA, current,
                 "§fOgni 3 colpi critici contro mostri",
                 "§fguadagni in base al mob."));
         player.openInventory(inventory);
@@ -120,7 +120,7 @@ final class WelcomeGuiManager implements Listener {
             case 10 -> PlayerRace.MINER;
             case 12 -> PlayerRace.CONTADINO;
             case 14 -> PlayerRace.SCUDO;
-            case 16 -> PlayerRace.SWORD;
+            case 16 -> PlayerRace.SPADA;
             default -> null;
         };
         if (selected == null) return;

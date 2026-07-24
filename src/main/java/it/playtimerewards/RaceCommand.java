@@ -36,19 +36,19 @@ final class RaceCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(raceManager.hasFreeChange(player.getUniqueId())
                     ? "§aHai ancora un cambio razza gratuito."
                     : "§aIl prossimo cambio costa §f\uE0D8 §e" + format(raceManager.changeCost()) + ".");
-            player.sendMessage("§cUsa §f/razza cambia <miner|contadino|scudo|sword>§7.");
+            player.sendMessage("§cUsa §f/razza cambia <miner|contadino|scudo|spada>§7.");
             return true;
         }
 
         if (args[0].equalsIgnoreCase("conferma")) return confirm(player);
         if (!args[0].equalsIgnoreCase("cambia") || args.length < 2) {
-            player.sendMessage("§cUso: /razza cambia <miner|contadino|scudo|sword>");
+            player.sendMessage("§cUso: /razza cambia <miner|contadino|scudo|spada>");
             return true;
         }
 
         PlayerRace target = PlayerRace.parse(args[1]).orElse(null);
         if (target == null) {
-            player.sendMessage("§cRazza non valida. Usa: miner, contadino, scudo oppure sword.");
+            player.sendMessage("§cRazza non valida. Usa: miner, contadino, scudo oppure spada.");
             return true;
         }
         if (raceManager.getRace(player.getUniqueId()) == target) {
@@ -100,7 +100,7 @@ final class RaceCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) return List.of("cambia", "conferma");
         if (args.length == 2 && args[0].equalsIgnoreCase("cambia")) {
-            return List.of("miner", "contadino", "scudo", "sword");
+            return List.of("miner", "contadino", "scudo", "spada");
         }
         return List.of();
     }

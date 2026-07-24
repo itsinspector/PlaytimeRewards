@@ -16,7 +16,7 @@ commands:
     permission: playtimerewards.admin
   razza:
     description: Mostra o cambia la propria razza.
-    usage: /razza [cambia <miner|contadino|scudo|sword>|conferma]
+    usage: /razza [cambia <miner|contadino|scudo|spada>|conferma]
     permission: playtimerewards.razza
 permissions:
   playtimerewards.playtime:

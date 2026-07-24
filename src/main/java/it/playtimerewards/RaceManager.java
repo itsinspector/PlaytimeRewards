@@ -46,7 +46,7 @@ final class RaceManager implements Listener {
     private final File file;
     private final Map<UUID, PlayerRace> races = new HashMap<>();
     private final Map<UUID, Boolean> freeChanges = new HashMap<>();
-    private final Map<UUID, Integer> swordCriticalCounters = new HashMap<>();
+    private final Map<UUID, Integer> spadaCriticalCounters = new HashMap<>();
 
     RaceManager(JavaPlugin plugin, Economy economy, LuckPerms luckPerms) {
         this.plugin = plugin;
@@ -95,7 +95,7 @@ final class RaceManager implements Listener {
         UUID uuid = player.getUniqueId();
         races.put(uuid, race);
         if (consumeFreeChange) freeChanges.put(uuid, false);
-        swordCriticalCounters.remove(uuid);
+        spadaCriticalCounters.remove(uuid);
         save();
         updateLuckPermsPrefix(player, race);
         applyRaceEffect(player, race);
@@ -175,7 +175,7 @@ final class RaceManager implements Listener {
     private PotionEffectType effectFor(PlayerRace race) {
         return switch (race) {
             case MINER -> PotionEffectType.HASTE;
-            case SWORD -> PotionEffectType.STRENGTH;
+            case SPADA -> PotionEffectType.STRENGTH;
             case CONTADINO -> PotionEffectType.SPEED;
             case SCUDO -> PotionEffectType.RESISTANCE;
         };
@@ -287,23 +287,23 @@ final class RaceManager implements Listener {
 
         if (!(event.getDamager() instanceof Player attacker)) return;
         if (!isRaceEnabled(attacker)) return;
-        if (getRace(attacker.getUniqueId()) != PlayerRace.SWORD) return;
+        if (getRace(attacker.getUniqueId()) != PlayerRace.SPADA) return;
         if (!(event.getEntity() instanceof Monster monster)) return;
-        if (!attacker.getInventory().getItemInMainHand().getType().name().endsWith("_SWORD")) return;
+        if (!attacker.getInventory().getItemInMainHand().getType().name().endsWith("_SPADA")) return;
         if (!isCritical(attacker)) return;
 
-        int needed = Math.max(1, plugin.getConfig().getInt("races.rewards.sword.criticals-required", 3));
-        int current = swordCriticalCounters.merge(attacker.getUniqueId(), 1, Integer::sum);
+        int needed = Math.max(1, plugin.getConfig().getInt("races.rewards.spada.criticals-required", 3));
+        int current = spadaCriticalCounters.merge(attacker.getUniqueId(), 1, Integer::sum);
         if (current < needed) {
-            attacker.sendActionBar("§eCritici SWORD: §f" + current + "§7/§f" + needed);
+            attacker.sendActionBar("§eCritici §lSPADA§e: §f" + current + "§7/§f" + needed);
             return;
         }
 
-        swordCriticalCounters.put(attacker.getUniqueId(), 0);
+        spadaCriticalCounters.put(attacker.getUniqueId(), 0);
         String type = monster.getType().name();
         double amount = plugin.getConfig().getDouble(
-                "races.rewards.sword.mobs." + type,
-                plugin.getConfig().getDouble("races.rewards.sword.default", 0.50D));
+                "races.rewards.spada.mobs." + type,
+                plugin.getConfig().getDouble("races.rewards.spada.default", 0.50D));
         reward(attacker, amount, "3 critici su " + pretty(type));
     }
 
@@ -377,8 +377,8 @@ final class RaceManager implements Listener {
         plugin.getConfig().addDefault("races.change-cost", 10000.0D);
         plugin.getConfig().addDefault("races.show-reward-message", true);
         plugin.getConfig().addDefault("races.rewards.scudo.per-block", 0.25D);
-        plugin.getConfig().addDefault("races.rewards.sword.criticals-required", 3);
-        plugin.getConfig().addDefault("races.rewards.sword.default", 0.50D);
+        plugin.getConfig().addDefault("races.rewards.spada.criticals-required", 3);
+        plugin.getConfig().addDefault("races.rewards.spada.default", 0.50D);
         plugin.getConfig().options().copyDefaults(true);
         plugin.saveConfig();
     }

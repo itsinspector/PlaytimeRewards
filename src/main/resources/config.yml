@@ -41,7 +41,7 @@ races:
         COCOA: 0.04
     scudo:
       per-block: 0.25
-    sword:
+    spada:
       criticals-required: 3
       default: 0.50
       mobs:
