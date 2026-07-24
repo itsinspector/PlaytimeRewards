@@ -371,7 +371,8 @@ final class RaceManager implements Listener {
 
         plugin.getConfig().addDefault("races.disabled-worlds", java.util.List.of(
                 "arena-pvp-unranked",
-                "pillars"
+                "pillars",
+                "bedfight"
         ));
         plugin.getConfig().addDefault("races.luckperms-prefix-priority", 100);
         plugin.getConfig().addDefault("races.change-cost", 10000.0D);

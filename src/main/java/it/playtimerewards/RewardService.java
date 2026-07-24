@@ -133,7 +133,7 @@ final class RewardService {
 
     private void giveReward(Player player) {
         String worldName = player.getWorld().getName();
-        if (worldName.equals("arena-pvp-unranked") || worldName.equals("pillars")) {
+        if (worldName.equals("arena-pvp-unranked") || worldName.equals("pillars") || worldName.equals("bedfight")) {
             return;
         }
 
