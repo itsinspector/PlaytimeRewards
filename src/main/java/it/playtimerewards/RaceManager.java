@@ -46,6 +46,7 @@ final class RaceManager implements Listener {
     private final File file;
     private final Map<UUID, PlayerRace> races = new HashMap<>();
     private final Map<UUID, Boolean> freeChanges = new HashMap<>();
+    private final Map<UUID, Boolean> racePrefixVisible = new HashMap<>();
     private final Map<UUID, Integer> spadaCriticalCounters = new HashMap<>();
 
     RaceManager(JavaPlugin plugin, Economy economy, LuckPerms luckPerms) {
@@ -62,13 +63,40 @@ final class RaceManager implements Listener {
         return races.getOrDefault(uuid, PlayerRace.MINER);
     }
 
+    boolean hasStoredRace(UUID uuid) {
+        return races.containsKey(uuid);
+    }
+
     void ensurePlayerInitialized(Player player) {
         UUID uuid = player.getUniqueId();
         if (races.containsKey(uuid)) return;
         races.put(uuid, PlayerRace.MINER);
         freeChanges.put(uuid, true);
+        racePrefixVisible.put(uuid, false);
         save();
         updateLuckPermsPrefix(player, PlayerRace.MINER);
+    }
+
+    boolean canToggleRacePrefix(Player player) {
+        if (player.isOp() || player.hasPermission("playtimerewards.razzavisibile")) {
+            return true;
+        }
+        if (luckPerms == null) {
+            return false;
+        }
+
+        User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+        return user != null && isVipGroup(user);
+    }
+
+    boolean toggleRacePrefix(Player player) {
+        ensurePlayerInitialized(player);
+        UUID uuid = player.getUniqueId();
+        boolean visible = !racePrefixVisible.getOrDefault(uuid, false);
+        racePrefixVisible.put(uuid, visible);
+        save();
+        updateLuckPermsPrefix(player, getRace(uuid));
+        return visible;
     }
 
     boolean hasFreeChange(UUID uuid) {
@@ -202,15 +230,87 @@ final class RaceManager implements Listener {
     }
 
     private void applyRacePrefix(User user, PlayerRace race) {
-        if (!"default".equalsIgnoreCase(user.getPrimaryGroup())) {
-            removeManagedRacePrefixes(user);
-            luckPerms.getUserManager().saveUser(user);
-            return;
-        }
         removeManagedRacePrefixes(user);
-        int priority = Math.max(1, plugin.getConfig().getInt("races.luckperms-prefix-priority", 100));
-        user.data().add(PrefixNode.builder(race.prefix(), priority).build());
+        removeManagedVipPrefixes(user);
+
+        if (isPrefixToggleEligible(user)) {
+            if (racePrefixVisible.getOrDefault(user.getUniqueId(), false)) {
+                int priority = Math.max(
+                        vipPrefixPriority(user) + 1,
+                        plugin.getConfig().getInt(
+                                "races.prefix-toggle.race-priority",
+                                4
+                        )
+                );
+                user.data().add(PrefixNode.builder(race.prefix(), priority).build());
+            } else {
+                String prefix = vipPrefix(user);
+                int priority = vipPrefixPriority(user);
+                if (prefix != null && !prefix.isBlank()) {
+                    user.data().add(PrefixNode.builder(prefix, priority).build());
+                }
+            }
+        } else if ("default".equalsIgnoreCase(user.getPrimaryGroup())) {
+            int priority = Math.max(
+                    1,
+                    plugin.getConfig().getInt(
+                            "races.luckperms-prefix-priority",
+                            100
+                    )
+            );
+            user.data().add(PrefixNode.builder(race.prefix(), priority).build());
+        }
+
         luckPerms.getUserManager().saveUser(user);
+    }
+
+    private boolean isVipGroup(User user) {
+        String primaryGroup = user.getPrimaryGroup();
+        return plugin.getConfig()
+                .getStringList("races.prefix-toggle.allowed-groups")
+                .stream()
+                .anyMatch(group -> group.equalsIgnoreCase(primaryGroup));
+    }
+
+    private boolean isVipPlusGroup(User user) {
+        String primaryGroup = user.getPrimaryGroup();
+        return plugin.getConfig()
+                .getStringList("races.prefix-toggle.vip-plus-groups")
+                .stream()
+                .anyMatch(group -> group.equalsIgnoreCase(primaryGroup));
+    }
+
+    private String vipPrefix(User user) {
+        if (isVipPlusGroup(user)) {
+            return plugin.getConfig().getString(
+                    "races.prefix-toggle.vip-plus-prefix",
+                    "%img_vippluss% &#00DE94"
+            );
+        }
+
+        return plugin.getConfig().getString(
+                "races.prefix-toggle.vip-prefix",
+                "%img_vip% &#FFB900"
+        );
+    }
+
+    private int vipPrefixPriority(User user) {
+        String path = isVipPlusGroup(user)
+                ? "races.prefix-toggle.vip-plus-priority"
+                : "races.prefix-toggle.vip-priority";
+        int defaultPriority = isVipPlusGroup(user) ? 3 : 2;
+        return Math.max(1, plugin.getConfig().getInt(path, defaultPriority));
+    }
+
+    private boolean isPrefixToggleEligible(User user) {
+        if (isVipGroup(user)) {
+            return true;
+        }
+
+        Player onlinePlayer = plugin.getServer().getPlayer(user.getUniqueId());
+        return onlinePlayer != null
+                && (onlinePlayer.isOp()
+                || onlinePlayer.hasPermission("playtimerewards.razzavisibile"));
     }
 
     private void removeManagedRacePrefixes(User user) {
@@ -221,6 +321,26 @@ final class RaceManager implements Listener {
                     user.data().remove(node);
                     break;
                 }
+            }
+        }
+    }
+
+    private void removeManagedVipPrefixes(User user) {
+        Set<String> configuredPrefixes = Set.of(
+                plugin.getConfig().getString(
+                        "races.prefix-toggle.vip-prefix",
+                        "%img_vip% &#FFB900"
+                ),
+                plugin.getConfig().getString(
+                        "races.prefix-toggle.vip-plus-prefix",
+                        "%img_vippluss% &#00DE94"
+                )
+        );
+
+        for (Node node : user.data().toCollection()) {
+            if (node instanceof PrefixNode prefixNode
+                    && configuredPrefixes.contains(prefixNode.getMetaValue())) {
+                user.data().remove(node);
             }
         }
     }
@@ -375,6 +495,25 @@ final class RaceManager implements Listener {
                 "bedfight"
         ));
         plugin.getConfig().addDefault("races.luckperms-prefix-priority", 100);
+        plugin.getConfig().addDefault(
+                "races.prefix-toggle.allowed-groups",
+                java.util.List.of("vip", "vip+", "vipplus")
+        );
+        plugin.getConfig().addDefault(
+                "races.prefix-toggle.vip-plus-groups",
+                java.util.List.of("vip+", "vipplus")
+        );
+        plugin.getConfig().addDefault("races.prefix-toggle.race-priority", 4);
+        plugin.getConfig().addDefault("races.prefix-toggle.vip-priority", 2);
+        plugin.getConfig().addDefault(
+                "races.prefix-toggle.vip-prefix",
+                "%img_vip% &#FFB900"
+        );
+        plugin.getConfig().addDefault("races.prefix-toggle.vip-plus-priority", 3);
+        plugin.getConfig().addDefault(
+                "races.prefix-toggle.vip-plus-prefix",
+                "%img_vippluss% &#00DE94"
+        );
         plugin.getConfig().addDefault("races.change-cost", 10000.0D);
         plugin.getConfig().addDefault("races.show-reward-message", true);
         plugin.getConfig().addDefault("races.rewards.scudo.per-block", 0.25D);
@@ -392,6 +531,7 @@ final class RaceManager implements Listener {
     private void load() {
         races.clear();
         freeChanges.clear();
+        racePrefixVisible.clear();
         if (!file.exists()) return;
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
         ConfigurationSection section = yaml.getConfigurationSection("players");
@@ -404,6 +544,13 @@ final class RaceManager implements Listener {
                 races.put(uuid, race);
                 String freePath = "players." + rawUuid + ".free-change-available";
                 freeChanges.put(uuid, yaml.contains(freePath) ? yaml.getBoolean(freePath) : true);
+                racePrefixVisible.put(
+                        uuid,
+                        yaml.getBoolean(
+                                "players." + rawUuid + ".race-prefix-visible",
+                                false
+                        )
+                );
             } catch (IllegalArgumentException exception) {
                 plugin.getLogger().warning("UUID non valido ignorato in races.yml: " + rawUuid);
             }
@@ -417,6 +564,7 @@ final class RaceManager implements Listener {
             String path = "players." + entry.getKey() + ".";
             yaml.set(path + "race", entry.getValue().name());
             yaml.set(path + "free-change-available", freeChanges.getOrDefault(entry.getKey(), true));
+            yaml.set(path + "race-prefix-visible", racePrefixVisible.getOrDefault(entry.getKey(), false));
         }
         try {
             yaml.save(file);

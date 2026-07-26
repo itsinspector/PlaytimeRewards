@@ -15,9 +15,12 @@ commands:
     usage: /setplaytimereward
     permission: playtimerewards.admin
   razza:
-    description: Mostra o cambia la propria razza.
-    usage: /razza [cambia <miner|contadino|scudo|spada>|conferma]
+    description: Mostra la razza di un giocatore o cambia la propria.
+    usage: /razza [giocatore|cambia <miner|contadino|scudo|spada>|conferma]
     permission: playtimerewards.razza
+  razzavisibile:
+    description: Alterna il prefisso visibile tra razza e VIP.
+    usage: /razzavisibile
 permissions:
   playtimerewards.playtime:
     description: Permette di usare /playtime.
@@ -25,6 +28,9 @@ permissions:
   playtimerewards.razza:
     description: Permette di usare /razza.
     default: true
+  playtimerewards.razzavisibile:
+    description: Permette di usare /razzavisibile anche senza un gruppo VIP configurato.
+    default: false
   playtimerewards.admin:
     description: Permette di impostare la ricompensa con /setplaytimereward.
     default: op

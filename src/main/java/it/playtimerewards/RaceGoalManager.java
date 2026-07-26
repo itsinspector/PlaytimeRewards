@@ -170,10 +170,13 @@ final class RaceGoalManager implements Listener {
                 incrementCompletedCycles(uuid, race);
 
                 int nextFirstThreshold = scaledThresholds(uuid, race).getFirst();
+                int newLevel = getRaceLevel(uuid, race);
 
                 player.sendMessage(
                         "§aHai completato tutti gli obiettivi §e"
                                 + race.displayName()
+                                + "§a e hai raggiunto il §6livello §e"
+                                + newLevel
                                 + "§a! Il percorso riparte da §e"
                                 + nextFirstThreshold
                                 + " §a"
@@ -267,6 +270,8 @@ final class RaceGoalManager implements Listener {
         bar.setTitle(
                 "§f"
                         + race.displayName()
+                        + " §8• §6Liv. §e"
+                        + getRaceLevel(uuid, race)
                         + " §8• §a"
                         + current
                         + "§7/§a"
@@ -304,6 +309,10 @@ final class RaceGoalManager implements Listener {
         return playerCycles == null
                 ? 0
                 : Math.max(0, playerCycles.getOrDefault(race, 0));
+    }
+
+    private int getRaceLevel(UUID uuid, PlayerRace race) {
+        return getCompletedCycles(uuid, race) + 1;
     }
 
     private void incrementCompletedCycles(UUID uuid, PlayerRace race) {
@@ -528,7 +537,16 @@ final class RaceGoalManager implements Listener {
 
                     cycles.put(
                             race,
-                            Math.max(0, yaml.getInt(basePath + ".cycles", 0))
+                            Math.max(
+                                    0,
+                                    yaml.getInt(
+                                            basePath + ".cycles",
+                                            Math.max(
+                                                    0,
+                                                    yaml.getInt(basePath + ".level", 1) - 1
+                                            )
+                                    )
+                            )
                     );
                 }
 
@@ -568,6 +586,10 @@ final class RaceGoalManager implements Listener {
                 yaml.set(
                         path + ".cycles",
                         getCompletedCycles(uuid, race)
+                );
+                yaml.set(
+                        path + ".level",
+                        getRaceLevel(uuid, race)
                 );
             }
         }

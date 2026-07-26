@@ -42,6 +42,21 @@ races:
     - arena-pvp-unranked
     - pillars
   luckperms-prefix-priority: 1
+  prefix-toggle:
+    # Gruppi LuckPerms che possono usare /razzavisibile.
+    allowed-groups:
+      - vip
+      - vip+
+      - vipplus
+    vip-plus-groups:
+      - vip+
+      - vipplus
+    # La priorità della razza deve essere maggiore di VIP e VIP+.
+    race-priority: 4
+    vip-priority: 2
+    vip-prefix: '%img_vip% &#FFB900'
+    vip-plus-priority: 3
+    vip-plus-prefix: '%img_vippluss% &#00DE94'
   change-cost: 10000.0
   show-reward-message: true
   rewards:

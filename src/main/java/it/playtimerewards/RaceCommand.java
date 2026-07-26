@@ -1,5 +1,7 @@
 package it.playtimerewards;
 
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -11,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 final class RaceCommand implements CommandExecutor, TabCompleter {
     private static final long CONFIRM_TIMEOUT_MILLIS = 30_000L;
@@ -41,7 +44,14 @@ final class RaceCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args[0].equalsIgnoreCase("conferma")) return confirm(player);
-        if (!args[0].equalsIgnoreCase("cambia") || args.length < 2) {
+        if (!args[0].equalsIgnoreCase("cambia")) {
+            if (args.length == 1) {
+                return showPlayerRace(player, args[0]);
+            }
+            player.sendMessage("§cUso: /razza <giocatore>");
+            return true;
+        }
+        if (args.length < 2) {
             player.sendMessage("§cUso: /razza cambia <miner|contadino|scudo|spada>");
             return true;
         }
@@ -66,6 +76,40 @@ final class RaceCommand implements CommandExecutor, TabCompleter {
             player.sendMessage("§aStai per diventare §f" + target.displayName() + "§a al costo di §f\uE0D8 §e" + format(cost) + "§e.");
         }
         player.sendMessage("§aScrivi §e/razza conferma §aentro 30 secondi per confermare.");
+        return true;
+    }
+
+    private boolean showPlayerRace(Player viewer, String playerName) {
+        Player onlineTarget = Bukkit.getPlayerExact(playerName);
+        if (onlineTarget != null) {
+            raceManager.ensurePlayerInitialized(onlineTarget);
+            viewer.sendMessage(
+                    "§eRazza di §f"
+                            + onlineTarget.getName()
+                            + "§e: §f"
+                            + raceManager.getRace(onlineTarget.getUniqueId()).displayName()
+            );
+            return true;
+        }
+
+        OfflinePlayer offlineTarget = Stream.of(Bukkit.getOfflinePlayers())
+                .filter(candidate -> candidate.getName() != null)
+                .filter(candidate -> candidate.getName().equalsIgnoreCase(playerName))
+                .findFirst()
+                .orElse(null);
+
+        if (offlineTarget == null
+                || !raceManager.hasStoredRace(offlineTarget.getUniqueId())) {
+            viewer.sendMessage("§cGiocatore non trovato o senza una razza salvata.");
+            return true;
+        }
+
+        viewer.sendMessage(
+                "§eRazza di §f"
+                        + offlineTarget.getName()
+                        + "§e: §f"
+                        + raceManager.getRace(offlineTarget.getUniqueId()).displayName()
+        );
         return true;
     }
 
@@ -98,7 +142,17 @@ final class RaceCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1) return List.of("cambia", "conferma");
+        if (args.length == 1) {
+            String input = args[0].toLowerCase(Locale.ROOT);
+            return Stream.concat(
+                            Stream.of("cambia", "conferma"),
+                            Bukkit.getOnlinePlayers().stream().map(Player::getName)
+                    )
+                    .filter(value -> value.toLowerCase(Locale.ROOT).startsWith(input))
+                    .distinct()
+                    .sorted(String.CASE_INSENSITIVE_ORDER)
+                    .toList();
+        }
         if (args.length == 2 && args[0].equalsIgnoreCase("cambia")) {
             return List.of("miner", "contadino", "scudo", "spada");
         }

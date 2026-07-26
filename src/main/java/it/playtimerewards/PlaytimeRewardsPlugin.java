@@ -34,6 +34,7 @@ public final class PlaytimeRewardsPlugin extends JavaPlugin {
         registerCommand("playtime", new PlaytimeCommand(rewardService, messages));
         registerCommand("setplaytimereward", new SetPlaytimeRewardCommand(this, messages));
         registerCommand("razza", raceCommand, raceCommand);
+        registerCommand("razzavisibile", new RaceVisibilityCommand(raceManager));
 
         getServer().getPluginManager().registerEvents(new PlayerConnectionListener(rewardService, welcomeGuiManager), this);
         getServer().getPluginManager().registerEvents(new PlayerMovementListener(afkManager), this);
