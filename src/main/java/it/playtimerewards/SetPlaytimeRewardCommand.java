@@ -43,7 +43,7 @@ final class SetPlaytimeRewardCommand implements CommandExecutor {
 
         messages.send(player, "reward-set", Map.of(
                 "amount", Integer.toString(storedReward.getAmount()),
-                "item", RewardService.readableMaterialName(storedReward.getType())
+                "item", RewardService.displayName(storedReward)
         ));
         return true;
     }

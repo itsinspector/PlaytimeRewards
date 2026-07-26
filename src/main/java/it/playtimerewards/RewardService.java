@@ -172,7 +172,7 @@ final class RewardService {
                 }
             }
 
-            grantedParts.add("&e" + configuredItem.getAmount() + "x " + readableMaterialName(configuredItem.getType()));
+            grantedParts.add("&e" + configuredItem.getAmount() + "x " + displayName(configuredItem));
         }
 
         if (grantedParts.isEmpty()) {
@@ -197,5 +197,12 @@ final class RewardService {
             result.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
         }
         return result.toString();
+    }
+
+    static String displayName(ItemStack item) {
+        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+            return item.getItemMeta().getDisplayName();
+        }
+        return readableMaterialName(item.getType());
     }
 }
