@@ -175,7 +175,9 @@ final class RaceGoalManager implements Listener {
                 player.sendMessage(
                         "§aHai completato tutti gli obiettivi §e"
                                 + race.displayName()
-                                + "§a e hai raggiunto il §6livello §e"
+                                + "§a e hai raggiunto il "
+                                + levelColor(race)
+                                + "livello "
                                 + newLevel
                                 + "§a! Il percorso riparte da §e"
                                 + nextFirstThreshold
@@ -270,7 +272,9 @@ final class RaceGoalManager implements Listener {
         bar.setTitle(
                 "§f"
                         + race.displayName()
-                        + " §8• §6Liv. §e"
+                        + " §8• "
+                        + levelColor(race)
+                        + "Liv. "
                         + getRaceLevel(uuid, race)
                         + " §8• §a"
                         + current
@@ -408,6 +412,15 @@ final class RaceGoalManager implements Listener {
             case CONTADINO -> BarColor.GREEN;
             case SCUDO -> BarColor.WHITE;
             case SPADA -> BarColor.BLUE;
+        };
+    }
+
+    private String levelColor(PlayerRace race) {
+        return switch (race) {
+            case MINER -> "§7";
+            case CONTADINO -> "§a";
+            case SCUDO -> "§f";
+            case SPADA -> "§b";
         };
     }
 
