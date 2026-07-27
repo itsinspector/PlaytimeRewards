@@ -26,7 +26,7 @@ final class RaceVisibilityCommand implements CommandExecutor {
         }
 
         if (!raceManager.canToggleRacePrefix(player)) {
-            player.sendMessage("§cQuesta opzione è disponibile solo per VIP e VIP+.");
+            player.sendMessage("§cQuesta opzione è disponibile solo per VIP e MVP.");
             return true;
         }
 
@@ -34,7 +34,7 @@ final class RaceVisibilityCommand implements CommandExecutor {
         player.sendMessage(
                 raceVisible
                         ? "§aPrefisso visibile impostato su: §eRAZZA§a."
-                        : "§aPrefisso visibile impostato su: §6VIP§a."
+                        : "§aPrefisso visibile impostato su: §eRANK§a."
         );
         return true;
     }
